@@ -5,6 +5,10 @@
 	position:relative;
 }
 
+.bar{
+	margin:50px 0px;
+}
+
 p{
 	margin:5px;
 	padding:0px;
