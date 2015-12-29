@@ -6,12 +6,15 @@
 	<link rel="shortcut icon" href="img/favicon/favicon.ico" />
 	<title>cScrollbar example page</title>
 
+	<!-- stylesheets -->
 	<link href="css/base.css" rel="stylesheet"/>
 	<link href="css/style.css" rel="stylesheet"/>
 	<link href="css/scrollbar.css" rel="stylesheet"/>
 	
-	<script src="js/jQuery/jquery-2.1.4.min.js"></script>
-	<script src="js/jQuery/jquery.color.min.js"></script> <!-- Required for color animation! -->
+	<!-- javascripts -->
+	<script src="js/jQuery/jquery-2.1.4.min.js"></script> <!-- required for jQuery libraries -->
+	<script src="js/jQuery/jquery.color.min.js"></script> <!-- required for color animation -->
+	<script src="js/jQuery/jquery.backstretch.min.js"></script> <!-- required for background stretch/animation -->
 	<script src="js/cScroll/cScroll.js"></script>
 
 	<script type="text/javascript">
@@ -21,11 +24,34 @@
 			return true;
 		}
 
-		$( document ).ready(function() {
-			var xbar = $('#bar_code').cScroll({axis:"xy",inside:true,x:{side:"top"}}).data("plugin_cScroll");
+		$( document ).ready(function() { // excetute this code when the page is 100% loaded
+
+			// this is where I make a div scrollable.
+			var bar = $('#bar_code').cScroll({axis:"xy",inside:true,x:{side:"top"}}).data("plugin_cScroll");
+		
 		});
 
+		$( document ).ready( function() { // excetute this code when the page is 100% loaded
 
+			// get the touch event type in javascript.
+			// this is the vent we should look to handle touch scroll
+			// if the device is not touch ready then we fallback to click
+			var eventType;
+
+		    if( 'ontouchstart' in window ){
+		        eventType = 'touchstart';
+		    }else if( window.navigator.pointerEnabled ){
+		        eventType = 'pointerdown';
+		    }else if( window.navigator.msPointerEnabled ){
+		        eventType = 'MSPointerDown';
+		    }else{ // fallback to click method
+		        eventType = 'click';
+		    }
+
+		    $("#touch_event").html( "Touch Event Type: <span style=\"color:#fa3423;font-weight:bold;\">'" + eventType + "'</span>" );
+		    
+		    $(document.body).on( eventType , function(e){ console.log( e ); });
+		});
 
 	</script>
 
@@ -40,50 +66,49 @@
 			<h2>cScroll example page</h2>
 		</div><!-- #title -->
 
+		<div id="info">
+			<div id="info_title">Settings</div><!-- #info_title -->
+			<hr/>
+			<div id="touch_event"></div><!-- #touch_event -->
+		</div><!-- #info -->
+
 		<div id="bar_manual" class="bar">
 
 			<div id="y_holder">
-				<div id="y_up">
-				</div><!-- #y_up -->
+				<div id="y_up"></div><!-- #y_up -->
 				<div id="y_track">
 					<div id="y_thumb_holder">
-						<div id="y_thumb">
-						</div><!-- #y_thumb -->
+						<div id="y_thumb"></div><!-- #y_thumb -->
 					</div><!-- #y_thumb_holder -->
 				</div><!-- #y_track -->
-				<div id="y_down">
-				</div><!-- #y_down -->
+				<div id="y_down"></div><!-- #y_down -->
 			</div><!-- #y_holder -->
 
 			<div id="x_holder">
-				<div id="x_left">
-				</div><!-- #x_left -->
+				<div id="x_left"></div><!-- #x_left -->
 				<div id="x_track">
 					<div id="x_thumb_holder">
-						<div id="x_thumb">
-						</div><!-- #x_thumb -->
+						<div id="x_thumb"></div><!-- #x_thumb -->
 					</div><!-- #x_thumb_holder -->
 				</div><!-- #x_track -->
-				<div id="x_right">
-				</div><!-- #x_right -->
+				<div id="x_right"></div><!-- #x_right -->
 			</div><!-- #x_holder -->
 
-			<div id="corner">
-			</div><!-- #corner -->
+			<div id="corner"></div><!-- #corner -->
 
-			<div id="viewport">
-				<div id="overview">
+			<div id="content_holder">
+				<div id="viewport">
+					<div id="overview">
 
-					<div style="height:50px;"></div>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed aliquet lectus, sed euismod enim. Fusce luctus turpis sed luctus vulputate. Aliquam leo dui, varius sed vulputate eu, laoreet et nisl. Sed a justo sit amet erat hendrerit hendrerit sit amet ut sem. Aenean dapibus dui ac elementum interdum. Nulla pellentesque ex eget turpis aliquam, ac fringilla tellus convallis. In vehicula, augue sed sollicitudin scelerisque, elit urna auctor quam, a pharetra magna neque in risus. Aenean fringilla enim at lacinia eleifend. Ut eu urna massa. Suspendisse erat arcu, feugiat vel pretium at, imperdiet quis neque. Phasellus placerat ligula et elementum venenatis. Pellentesque iaculis iaculis sollicitudin. Vivamus pretium enim in ante blandit molestie. Proin eget ante eleifend, cursus nisl id, scelerisque odio.</p>
 
-					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed aliquet lectus, sed euismod enim. Fusce luctus turpis sed luctus vulputate. Aliquam leo dui, varius sed vulputate eu, laoreet et nisl. Sed a justo sit amet erat hendrerit hendrerit sit amet ut sem. Aenean dapibus dui ac elementum interdum. Nulla pellentesque ex eget turpis aliquam, ac fringilla tellus convallis. In vehicula, augue sed sollicitudin scelerisque, elit urna auctor quam, a pharetra magna neque in risus. Aenean fringilla enim at lacinia eleifend. Ut eu urna massa. Suspendisse erat arcu, feugiat vel pretium at, imperdiet quis neque. Phasellus placerat ligula et elementum venenatis. Pellentesque iaculis iaculis sollicitudin. Vivamus pretium enim in ante blandit molestie. Proin eget ante eleifend, cursus nisl id, scelerisque odio.</p>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed aliquet lectus, sed euismod enim. Fusce luctus turpis sed luctus vulputate. Aliquam leo dui, varius sed vulputate eu, laoreet et nisl. Sed a justo sit amet erat hendrerit hendrerit sit amet ut sem. Aenean dapibus dui ac elementum interdum. Nulla pellentesque ex eget turpis aliquam, ac fringilla tellus convallis. In vehicula, augue sed sollicitudin scelerisque, elit urna auctor quam, a pharetra magna neque in risus. Aenean fringilla enim at lacinia eleifend. Ut eu urna massa. Suspendisse erat arcu, feugiat vel pretium at, imperdiet quis neque. Phasellus placerat ligula et elementum venenatis. Pellentesque iaculis iaculis sollicitudin. Vivamus pretium enim in ante blandit molestie. Proin eget ante eleifend, cursus nisl id, scelerisque odio.</p>
 
-					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed aliquet lectus, sed euismod enim. Fusce luctus turpis sed luctus vulputate. Aliquam leo dui, varius sed vulputate eu, laoreet et nisl. Sed a justo sit amet erat hendrerit hendrerit sit amet ut sem. Aenean dapibus dui ac elementum interdum. Nulla pellentesque ex eget turpis aliquam, ac fringilla tellus convallis. In vehicula, augue sed sollicitudin scelerisque, elit urna auctor quam, a pharetra magna neque in risus. Aenean fringilla enim at lacinia eleifend. Ut eu urna massa. Suspendisse erat arcu, feugiat vel pretium at, imperdiet quis neque. Phasellus placerat ligula et elementum venenatis. Pellentesque iaculis iaculis sollicitudin. Vivamus pretium enim in ante blandit molestie. Proin eget ante eleifend, cursus nisl id, scelerisque odio.</p>
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed aliquet lectus, sed euismod enim. Fusce luctus turpis sed luctus vulputate. Aliquam leo dui, varius sed vulputate eu, laoreet et nisl. Sed a justo sit amet erat hendrerit hendrerit sit amet ut sem. Aenean dapibus dui ac elementum interdum. Nulla pellentesque ex eget turpis aliquam, ac fringilla tellus convallis. In vehicula, augue sed sollicitudin scelerisque, elit urna auctor quam, a pharetra magna neque in risus. Aenean fringilla enim at lacinia eleifend. Ut eu urna massa. Suspendisse erat arcu, feugiat vel pretium at, imperdiet quis neque. Phasellus placerat ligula et elementum venenatis. Pellentesque iaculis iaculis sollicitudin. Vivamus pretium enim in ante blandit molestie. Proin eget ante eleifend, cursus nisl id, scelerisque odio.</p>
 
-					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed aliquet lectus, sed euismod enim. Fusce luctus turpis sed luctus vulputate. Aliquam leo dui, varius sed vulputate eu, laoreet et nisl. Sed a justo sit amet erat hendrerit hendrerit sit amet ut sem. Aenean dapibus dui ac elementum interdum. Nulla pellentesque ex eget turpis aliquam, ac fringilla tellus convallis. In vehicula, augue sed sollicitudin scelerisque, elit urna auctor quam, a pharetra magna neque in risus. Aenean fringilla enim at lacinia eleifend. Ut eu urna massa. Suspendisse erat arcu, feugiat vel pretium at, imperdiet quis neque. Phasellus placerat ligula et elementum venenatis. Pellentesque iaculis iaculis sollicitudin. Vivamus pretium enim in ante blandit molestie. Proin eget ante eleifend, cursus nisl id, scelerisque odio.</p>
-
-				</div><!-- #overview -->
-			</div><!-- #viewport -->
+					</div><!-- #overview -->
+				</div><!-- #viewport -->
+			</div>
 			
 		</div><!-- #bar_manual .bar -->
 
@@ -98,6 +123,12 @@
 		</div><!-- #bar_code .bar -->
 
 	</div><!-- #content .container-fluid -->
+
+	<script type="text/javascript">
+		// stretch (show in center) background image:
+		$.backstretch("img/wallpaper/colorful.jpg");
+	</script>
+
 
 </body>
 

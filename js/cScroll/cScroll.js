@@ -195,7 +195,8 @@
 
             	var content; // copy the content to the overview box
             	if( ( content = $container.html() ) != "" ) $container.html( "" );
-            	self.$viewport = createDiv( "Viewport" , $container );
+            	self.$wrapper =  createDiv( "Wrapper" , $container );
+            	self.$viewport = createDiv( "Viewport" , self.$wrapper );
             	self.$overview = createDiv( "Overview" , self.$viewport ).html( content );
 
 

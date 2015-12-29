@@ -39,3 +39,41 @@ html{
 #title{
 	text-align:center;
 }
+
+#info{
+  width:500px;
+  margin:10px auto;
+  background-color:#eeeeee;
+  color:#151503;
+  text-align:center;
+  font-size:18px;
+  padding:10px;
+  border:1px #F7AA3E solid;
+  -webkit-box-shadow:0px 1px 1px #121212;
+  -moz-box-shadow:0px 1px 1px #121212;
+  box-shadow:0px 1px 1px #121212;
+}
+
+#info_title{
+  font-weight:bold;
+  font-size:18px;
+  margin-bottom:8px;
+}
+
+#bar_manual{
+  width:400px;
+  height:400px;
+  background-color:#F0F0F0;
+  position:relative;
+}
+
+#bar_code{
+  width:400px;
+  height:400px;
+  background-color:rgba(200,200,200,0.4);
+  position:relative;
+}
+
+.bar{
+  margin:50px 0px;
+}

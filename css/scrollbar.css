@@ -1,19 +1,3 @@
-#bar_manual{
-	width:400px;
-	height:400px;
-	background-color:#F0F0F0;
-	position:relative;
-}
-
-.bar{
-	margin:50px 0px;
-}
-
-p{
-	margin:5px;
-	padding:0px;
-}
-
 #y_holder{
 	position:absolute;
 	bottom:0px;
@@ -117,11 +101,19 @@ p{
 	background-color:#215433;
 }
 
+#content_holder{
+	position:absolute;
+	height:350px;
+	width:350px;
+	top:50px;
+	right:50px;
+}
+
 #viewport{
 	overflow:hidden;
 	position:relative;
-	height:100%;
 	width:100%;
+	height:100%;
 }
 
 #overview{
