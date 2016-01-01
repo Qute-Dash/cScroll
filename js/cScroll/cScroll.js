@@ -52,7 +52,9 @@
                 thumbMinLength:40,
 
                 startLength:20,
-                endLength:20
+                endLength:20,
+
+                clickRatio:1.25
             },
             y:{
                 // side:"right",
@@ -66,7 +68,9 @@
                 thumbMinLength:40,
 
                 startLength:20,
-                endLength:20
+                endLength:20,
+
+                clickRatio:1.25
             },
 
             wheelEnabled:true,
@@ -362,6 +366,12 @@
                     mousePosition: 0
                 }
 
+                this.scrollbarDragEvent = {
+                    thumbClicked: false,
+                    trackClicked: false,
+                    started: false
+                }
+
                 this.wheel = {
                     overWheel:0
                 };
@@ -376,6 +386,7 @@
                 this.$thumb = createDiv( "Thumb" , this.$thumbWrapper , axis );
 
                 this.update();
+                this.bindEvents();
                 
             }
 
@@ -690,9 +701,6 @@
             }
 
             Scrollbar.prototype.updatePositionCss = function( thumbPosition , contentPosition ){
-
-
-
                 this.$thumb.css( this.getLongitudinalSideName() , thumbPosition || this.position.thumbPosition );
                 self.$overview.css( this.getLongitudinalSideName() , -contentPosition || -this.position.contentPosition );
             }
@@ -704,7 +712,6 @@
                 this.position.thumbPosition = Math.min( ( this.getTrackLongitudinalSize() - this.getThumbLongitudinalSize() ) , this.position.contentPosition / this.getTrackRatio() );
                 
                 this.updatePositionCss();
-
                 this.triggerMove( delta );           
             }
 
@@ -722,7 +729,113 @@
                 return this.position.contentPosition <= ( this.getContentLongitudinalSize() - this.getViewportLongitudinalSize() ) - 5;
             }
 
+            Scrollbar.prototype.trackBegin = function(){
+                return this.$track.offset()[ this.getLongitudinalSideName() ];
+            }
+
+            Scrollbar.prototype.trackEnd = function(){
+                return this.trackBegin() + this.getTrackLongitudinalSize();
+            }
+
             // SCROLLBAR RELATED EVENT HANDLERS --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --
+
+            Scrollbar.prototype.bindEvents = function(){
+                var me = this;
+                this.$thumb.on( "mousedown" , { "axis" : this.axis } , function( e ){
+                    me.start( e , false );
+                });
+                this.$track.on( "mousedown" ,  { "axis" : this.axis } , function( e ){
+                    me.start( e , true );
+                });
+            }
+
+            Scrollbar.prototype.start = function( e , trackClicked ){
+
+                if( this.hasContentToSroll() ){
+
+                    if( this.scrollbarDragEvent.thumbClicked ) return; // a higher priority drag event has been already stated...
+
+                    $("body").addClass( "cScrollbarNoSelect" );
+                    this.scrollbarDragEvent.started = true;
+
+                    if( trackClicked ){
+
+                        this.scrollbarDragEvent.trackClicked = true;
+                        this.scrollbarDragEvent.thumbClicked = false;
+
+                        this.position.mousePosition = this.$thumb.offset()[ this.getLongitudinalSideName() ];
+
+                    }else{
+
+                        this.scrollbarDragEvent.trackClicked = false;
+                        this.scrollbarDragEvent.thumbClicked = true;
+
+                        this.position.mousePosition = this.isVertical() ? e.pageY : e.pageX;
+
+                    }
+
+                    $(document).on( "mousemove" , { "me" : this } , this.drag );
+                    $(document).on( "mouseup"   , { "me" : this } , this.end );
+                    this.$thumb.on( "mouseup"   , { "me" : this } , this.end );
+                    this.$track.on( "mouseup"   , { "me" : this } , this.end );
+
+                    e.data.me = this;
+                    this.drag( e , true );
+                }
+
+            }
+
+            Scrollbar.prototype.drag = function( e , clickEvent ){
+
+                var me = e.data.me;
+                var mousePositionNew = me.isVertical() ? e.pageY : e.pageX;
+                var thumbPositionDelta = mousePositionNew - me.position.mousePosition;
+
+                if(
+                    me.hasContentToSroll()
+                    && ( me.trackBegin() + 2 ) < mousePositionNew
+                    && mousePositionNew < ( me.trackEnd() + 2 )
+                    && thumbPositionDelta != 0 // to avoid glitchy jumps when click spam on thumb..
+                ){
+
+                    if( isDef( clickEvent ) && clickEvent && me.scrollbarDragEvent.trackClicked ){
+
+                        thumbPositionDelta = mousePositionNew - me.position.mousePosition - ( me.getThumbLongitudinalSize() / 2 );
+                    
+                        // multiply by clickRatio ~ 1.25 ... 2.00
+                        var ratio = Math.min( 1 , me.options.clickRatio * Math.abs( thumbPositionDelta ) / me.getTrackLongitudinalSize() );
+                        thumbPositionDelta *= ( ratio < 0.25 ) ? 1 : ratio; // avoid very tiny small jumps... go straight to destination.
+
+                    }else if( isDef( clickEvent ) && clickEvent && me.scrollbarDragEvent.thumbClicked ){
+                        thumbPositionDelta = 0;
+                    }
+
+                    me.position.thumbPosition = Math.min( ( me.getTrackLongitudinalSize() - me.getThumbLongitudinalSize() ) , Math.max( 0 , me.position.thumbPosition + thumbPositionDelta ) );
+                    
+                    me.jumpToContentPosition( me.position.thumbPosition * me.getTrackRatio() );
+                    me.position.mousePosition = mousePositionNew;
+
+                    e.preventDefault();
+
+                }
+            }
+
+            Scrollbar.prototype.end = function( e ){
+                var me = e.data.me;
+
+                $("body").removeClass( "cScrollbarNoSelect" );
+
+                $(document).off( "mousemove" , me.drag );
+                $(document).off( "mouseup" , me.end );
+                me.$thumb.off( "mouseup" , me.end );
+                me.$track.off( "mouseup" , me.end );
+
+                me.scrollbarDragEvent.trackClicked = false;
+                me.scrollbarDragEvent.thumbClicked = false;
+                me.scrollbarDragEvent.started = false;
+
+                e.preventDefault();
+            }
 
             Scrollbar.prototype.wheelEvent = function( e ){
                 if( this.hasContentToSroll() ){
