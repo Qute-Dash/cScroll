@@ -209,6 +209,14 @@
 .cScrollThumb{
 	position:absolute;
 	background-color:rgba(250,236,20,0.8);
+	/*
+	cursor:pointer;
+	cursor:hand;
+	*/
+}
+
+.cScrollThumb:hover{
+	background-color:rgba(250,30,200,0.8);
 }
 
 .cScrollThumbX{

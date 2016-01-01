@@ -69,13 +69,16 @@
                 endLength:20
             },
 
+            wheelEnabled:true,
+            wheelSpeed:20,
+            wheelLock:false,
+            allowedOverWheelCount:20,
+
             cornerEnabled:true,
             flatOutAxis:'',
-
-
-
             cornerPosition:"", //"top right",
             
+
 
             zoomEnabled:true
             
@@ -91,6 +94,7 @@
 
             var self = this; // create ourselves object and contian all information in here.
             self.options = {}; // create option container where all important variables will be kept
+            self.options.wheelTimeout = undefined;
 
             self.scrollbars = []; // this array will hold the scroll bars ( X and/or Y )
 
@@ -230,13 +234,13 @@
                 if( isDualAxis() && isBothAxisVisible() ){
                     switch( self.options.flatOutAxis ){
                         case attrs[X]:
-                        return Y;
+                            return Y;
                         case attrs[Y]:
-                        return X;
+                            return X;
                         default:
-                        if( isBothAxisOutside() || isBothAxisInside() ) return Y;
-                        else if( isScrollbarExists(X) && !getScrollbar(X).isInside() ) return X;
-                        else return Y;
+                            if( isBothAxisOutside() || isBothAxisInside() ) return Y;
+                            else if( isScrollbarExists(X) && !getScrollbar(X).isInside() ) return X;
+                            else return Y;
                     }
                 }else{
                     if( isScrollbarExists(X) && !getScrollbar(X).isDisplayNone() ) return X;
@@ -358,6 +362,10 @@
                     mousePosition: 0
                 }
 
+                this.wheel = {
+                    overWheel:0
+                };
+
                 this.$scrollbar = createDiv( "Scrollbar" , $container , axis );
 
                 this.$start = createDiv( "Start" , this.$scrollbar , axis );
@@ -369,7 +377,6 @@
 
                 this.update();
                 
-
             }
 
             Scrollbar.prototype.update = function(){
@@ -385,7 +392,9 @@
                 this.setTrackCss();
                 this.setEndCss();
                 this.setThumbCss();
+
                 self.setWrapperCss();
+                if( isDef( self.corner ) ) self.corner.update();
                 
             }
 
@@ -430,7 +439,8 @@
                 this.$thumb
                 .css( this.getTransverseDimensionName() , this.getThumbTransverseSize() )
                 .css( this.getTransverseSideName() , this.getThumbTransversePosition() )
-                .css( this.getLongitudinalDimensionName() , this.getThumbLongitudinalSize() );
+                .css( this.getLongitudinalDimensionName() , this.getThumbLongitudinalSize() )
+                .css( this.getLongitudinalSideName() , this.getThumbLongitudinalPosition() );
             }
 
             Scrollbar.prototype.isDisplayNone = function(){
@@ -522,18 +532,18 @@
                     }else if( isBothAxisInside() ){
                         switch( self.options.flatOutAxis ){
                             case attrs[X]:
-                            return this.isVertical() ? h_minus : w;
+                                return this.isVertical() ? h_minus : w;
                             case attrs[Y]:
                             default:
-                            return this.isVertical() ? h : w_minus;
+                                return this.isVertical() ? h : w_minus;
                         }
                     }else if( isBothAxisOutside() ){
                         switch( self.options.flatOutAxis ){
                             case attrs[X]:
-                            return this.isVertical() ? h : w_plus;
+                                return this.isVertical() ? h : w_plus;
                             case attrs[Y]:
                             default:
-                            return this.isVertical() ? h_plus : w;
+                                return this.isVertical() ? h_plus : w;
                         }
                     }
                 }else{
@@ -639,30 +649,102 @@
                 return pos;
             }
 
-            // ENGINE CORE --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+            Scrollbar.prototype.getThumbLongitudinalPosition = function(){
+                return this.position.thumbPosition;
+            }
+            
 
-            Scrollbar.prototype.viewportLength = function(){
+            // ENGINE CORE --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+            Scrollbar.prototype.getViewportLongitudinalSize = function(){
                 return self.$viewport[0][ 'offset' + capitalizeFirstChar( this.getLongitudinalDimensionName() ) ];
             }
 
-            Scrollbar.prototype.contentLength = function(){
+            Scrollbar.prototype.getContentLongitudinalSize = function(){
                 return self.$overview[0][ 'scroll' + capitalizeFirstChar( this.getLongitudinalDimensionName() ) ];
             }
 
             Scrollbar.prototype.contentRatio = function(){
-                return this.viewportLength() / this.contentLength();
+                return this.getViewportLongitudinalSize() / this.getContentLongitudinalSize();
             }
 
-            Scrollbar.prototype.trackRatio = function(){
-                return ( this.contentLength() - this.viewportLength() ) / ( this.getTrackLongitudinalSize() - this.getThumbLongitudinalSize() );
+            Scrollbar.prototype.getTrackRatio = function(){
+                return ( this.getContentLongitudinalSize() - this.getViewportLongitudinalSize() ) / ( this.getTrackLongitudinalSize() - this.getThumbLongitudinalSize() );
             }
 
             Scrollbar.prototype.hasContentToSroll = function(){
                 return this.contentRatio() < 1;
             }
 
-            // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+            Scrollbar.prototype.triggerMove = function( delta ){
+                var direction;
+                if( delta < 0 ){
+                    direction = this.isVertical() ? attrs[U] : attrs[L];
+                }else if( delta > 0 ){
+                    direction = this.isVertical() ? attrs[D] : attrs[R];
+                }else{
+                    return;
+                }
 
+                $container.trigger( "move" + capitalizeFirstChar( direction ) );
+            }
+
+            Scrollbar.prototype.updatePositionCss = function( thumbPosition , contentPosition ){
+
+
+
+                this.$thumb.css( this.getLongitudinalSideName() , thumbPosition || this.position.thumbPosition );
+                self.$overview.css( this.getLongitudinalSideName() , -contentPosition || -this.position.contentPosition );
+            }
+
+            Scrollbar.prototype.jumpToContentPosition = function( contentPosition ){
+                var delta = contentPosition - this.position.contentPosition;
+
+                this.position.contentPosition = Math.min( ( this.getContentLongitudinalSize() - this.getViewportLongitudinalSize() ) , Math.max( 0 , contentPosition ) );
+                this.position.thumbPosition = Math.min( ( this.getTrackLongitudinalSize() - this.getThumbLongitudinalSize() ) , this.position.contentPosition / this.getTrackRatio() );
+                
+                this.updatePositionCss();
+
+                this.triggerMove( delta );           
+            }
+
+            // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+            Scrollbar.prototype.destroy = function(){
+                this.$scrollbar.remove();
+            }
+
+            Scrollbar.prototype.isAtBegin = function(){
+                return this.position.contentPosition > 0;
+            }
+
+            Scrollbar.prototype.isAtEnd = function(){
+                return this.position.contentPosition <= ( this.getContentLongitudinalSize() - this.getViewportLongitudinalSize() ) - 5;
+            }
+
+            // SCROLLBAR RELATED EVENT HANDLERS --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --
+
+            Scrollbar.prototype.wheelEvent = function( e ){
+                if( this.hasContentToSroll() ){
+
+                    var wheelDelta = this.isVertical() ? e.deltaY : -e.deltaX;
+
+                    this.jumpToContentPosition( this.position.contentPosition - ( wheelDelta * self.options.wheelSpeed ) );
+
+                    e = $.event.fix( e );
+
+                    if( self.options.wheelLock || this.isAtBegin() && this.isAtEnd() ){
+                        e.preventDefault();
+                        this.wheel.overWheel = 0;
+                    }else if( Math.abs( this.wheel.overWheel ) < self.options.allowedOverWheelCount ){
+                        e.preventDefault();
+                        this.wheel.overWheel += wheelDelta;
+                    }
+
+                }
+            }
+
+            // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
 
             // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -681,6 +763,37 @@
                 if( window.PointerEvent && window.navigator.pointerEnabled ) return pointerEvent;
                 else if( window.MSPointerEvent && window.navigator.msPointerEnabled ) return 'MSPointer' + pointerEvent.charAt(7).toUpperCase() + pointerEvent.substr(8);
                 return "";
+            }
+
+            function bindEvents(){
+                self.refreshInterval = setInterval( self.update() , 10000 );
+                $container.on( "mousewheel" , wheelEvent );
+            }
+
+            function wheelEvent( e ){
+
+                if( ! self.options.wheelEnabled ) return;
+
+                if ( ! isDef( self.options.wheelTimeout ) ){
+                    $container.trigger("scrollStart");
+                }
+
+                // Execute the scrollEnd event after 400ms the wheel stopped scrolling
+                clearTimeout( self.options.wheelTimeout );
+                self.options.wheelTimeout = setTimeout(function (){
+                    $container.trigger("scrollEnd");
+                    self.options.wheelTimeout = undefined;
+                } , 400 );
+
+                if( e.deltaX != 0 && e.deltaX != -0 ){
+                    if( isScrollbarExists(X) && getScrollbar(X).hasContentToSroll() ){
+                        getScrollbar(X).wheelEvent( e );
+                    }
+                }else if( e.deltaY != 0 && e.deltaY != -0 ){
+                    if( isScrollbarExists(Y) && getScrollbar(Y).hasContentToSroll() ){
+                        getScrollbar(Y).wheelEvent( e );
+                    }
+                }
             }
 
             // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -703,7 +816,9 @@
 
                 self.corner = new Corner();
 
-                self.update( options );
+                self.update();
+
+                bindEvents();
 
             }
 
@@ -711,7 +826,7 @@
                 updateOptions( options );
                 self.setWrapperCss();
                 updateScrollbars();
-                self.corner.update();
+                $container.trigger("scrollUpdate");
             }
 
             this.setWrapperCss = function(){
