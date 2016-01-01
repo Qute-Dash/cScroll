@@ -126,3 +126,104 @@
 	padding:0px;
 	color:#121212;
 }
+
+/* ----------------------------------------------------------------------------- */
+
+.cScroll{
+	position:relative;
+}
+
+.cScrollWrapper{
+	position:absolute;
+}
+
+.cScrollViewport{
+	overflow:hidden;
+    position:relative;
+    width:100%;
+    height:100%;
+}
+
+.cScrollOverview{
+	position:absolute;
+    left:0;
+    top:0;
+}
+
+.cScrollScrollbar{
+	position:absolute;
+}
+
+.cScrollScrollbarX{
+	background-color:rgba(92,106,231,0.8);
+}
+
+.cScrollScrollbarY{
+	background-color:rgba(29,191,113,0.8);
+}
+
+.cScrollStart{
+	position:absolute;
+	background-color:rgba(191,20,10,0.8);
+}
+
+.cScrollStartY{
+
+}
+
+.cScrollStartX{
+
+}
+
+.cScrollEnd{
+	position:absolute;
+	background-color:rgba(191,20,10,0.8);
+}
+
+.cScrollEndY{
+
+}
+
+.cScrollEndX{
+
+}
+
+.cScrollTrack{
+	position:absolute;
+}
+
+.cScrollTrackX{
+	background-color:rgba(29,191,113,0.8);
+}
+
+.cScrollTrackY{
+	background-color:rgba(92,106,231,0.8);
+}
+
+.cScrollThumbwrapper{
+	position:relative;
+	width:100%;
+	height:100%;
+}
+
+.cScrollThumb{
+	position:absolute;
+	background-color:rgba(250,236,20,0.8);
+}
+
+.cScrollThumbX{
+
+}
+
+.cScrollThumbY{
+
+}
+
+.cScrollCorner{
+	position:absolute;
+	background-color:rgba(200,200,200,0.9);
+	background-image:url("../img/cScroll/zoom.png");
+	background-size:cover;
+	width:20px;
+	height:20px;
+}
