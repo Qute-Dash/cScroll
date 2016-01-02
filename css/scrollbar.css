@@ -241,9 +241,13 @@
 	*/
 }
 
-.cScrollThumb:hover{
+.cScrollScrollbarHovered .cScrollThumb{
 	background-color:rgba(250,30,200,0.8);
 }
+
+/*.cScrollThumb:hover{
+	background-color:rgba(250,30,200,0.8);
+}*/
 
 .cScrollThumbX{
 

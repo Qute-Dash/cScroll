@@ -783,16 +783,13 @@
                 return this.trackBegin() + this.getTrackLongitudinalSize();
             }
 
-            /*
-            var s = this.getStartLongitudinalPosition() + this.getStartLongitudinalSize();
-                var e = this.getEndLongitudinalPosition() + this.getEndLongitudinalSize();
-                return this.getScrollbarLongitudinalSize() - ( s + e );
-            */
-
             // SCROLLBAR RELATED EVENT HANDLERS --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --
 
             Scrollbar.prototype.bindEvents = function(){
                 var me = this;
+
+                this.$scrollbar.on( "mouseenter" , { "me" : this } , this.scrollbarMouseEnter );
+                this.$scrollbar.on( "mouseleave" , { "me" : this } , this.scrollbarMouseLeave );
 
                 this.$thumb.on( "mousedown" , { "axis" : this.axis } , function( e ){
                     me.start( e , false );
@@ -804,6 +801,18 @@
 
                 this.$start.on( "mousedown" , { "me" : this } , this.startBoxMouseDown );
                 this.$end.on( "mousedown" , { "me" : this } , this.endBoxMouseDown );
+            }
+
+            Scrollbar.prototype.scrollbarMouseEnter = function( e ){
+                var me = e.data.me;
+                me.status.hovered = true;
+                me.$scrollbar.addClass( pluginName + self.options.theme + "ScrollbarHovered" );
+            }
+
+            Scrollbar.prototype.scrollbarMouseLeave = function( e ){
+                var me = e.data.me;
+                me.status.hovered = false;
+                me.$scrollbar.removeClass( pluginName + self.options.theme + "ScrollbarHovered" );
             }
 
             Scrollbar.prototype.startBoxMouseDown = function( e ){
