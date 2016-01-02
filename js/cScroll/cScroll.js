@@ -454,7 +454,7 @@
                 if( this.isVertical() ) name = base + capitalizeFirstChar( attrs[U] );
                 else name = base + capitalizeFirstChar( attrs[L] );
 
-                if( this.position.thumbPosition == 0 ) name += " " + dis;
+                if( Math.floor( this.position.thumbPosition ) == 0 ) name += " " + dis;
                 else this.$start.removeClass( dis );
 
                 this.$start.addClass( name );
@@ -482,7 +482,7 @@
                 if( this.isVertical() ) name = base + capitalizeFirstChar( attrs[D] );
                 else name = base + capitalizeFirstChar( attrs[R] );
 
-                if( this.position.thumbPosition == ( this.getTrackLongitudinalSize() - this.getThumbLongitudinalSize() ) ) name += " " + dis;
+                if( Math.ceil( this.position.thumbPosition ) == ( this.getTrackLongitudinalSize() - this.getThumbLongitudinalSize() ) ) name += " " + dis;
                 else this.$end.removeClass( dis );
 
                 this.$end.addClass( name );
@@ -782,6 +782,12 @@
             Scrollbar.prototype.trackEnd = function(){
                 return this.trackBegin() + this.getTrackLongitudinalSize();
             }
+
+            /*
+            var s = this.getStartLongitudinalPosition() + this.getStartLongitudinalSize();
+                var e = this.getEndLongitudinalPosition() + this.getEndLongitudinalSize();
+                return this.getScrollbarLongitudinalSize() - ( s + e );
+            */
 
             // SCROLLBAR RELATED EVENT HANDLERS --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --
 
