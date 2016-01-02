@@ -164,7 +164,12 @@
 
 .cScrollStart{
 	position:absolute;
-	background-color:rgba(191,20,10,0.8);
+	background-color:rgba(200,200,200,0.9);
+	background-size:cover;
+}
+
+.cScrollStartDisabled{
+	background-color:rgba(200,50,100,0.9);
 }
 
 .cScrollStartY{
@@ -175,9 +180,22 @@
 
 }
 
+.cScrollStartUp{
+	background-image:url("../img/cScroll/up-arrow.png");
+}
+
+.cScrollStartLeft{
+	background-image:url("../img/cScroll/left-arrow.png");
+}
+
 .cScrollEnd{
 	position:absolute;
-	background-color:rgba(191,20,10,0.8);
+	background-color:rgba(200,200,200,0.9);
+	background-size:cover;
+}
+
+.cScrollEndDisabled{
+	background-color:rgba(200,50,100,0.9);
 }
 
 .cScrollEndY{
@@ -186,6 +204,14 @@
 
 .cScrollEndX{
 
+}
+
+.cScrollEndDown{
+	background-image:url("../img/cScroll/down-arrow.png");
+}
+
+.cScrollEndRight{
+	background-image:url("../img/cScroll/right-arrow.png");
 }
 
 .cScrollTrack{

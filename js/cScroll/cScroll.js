@@ -54,7 +54,7 @@
                 startLength:20,
                 endLength:20,
 
-                clickRatio:1.25
+                clickRatio:1.75
             },
             y:{
                 // side:"right",
@@ -70,13 +70,15 @@
                 startLength:20,
                 endLength:20,
 
-                clickRatio:1.25
+                clickRatio:1.75
             },
 
             wheelEnabled:true,
             wheelSpeed:20,
             wheelLock:false,
             allowedOverWheelCount:20,
+
+            touchEnabled:true,
 
             cornerEnabled:true,
             flatOutAxis:'',
@@ -102,6 +104,10 @@
 
             self.scrollbars = []; // this array will hold the scroll bars ( X and/or Y )
 
+            self.mousePosition = {
+                "x":0,
+                "y":0
+            };
 
             // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
             // COMMON UTILITIES
@@ -292,59 +298,71 @@
             function addScrollbar( axis ){
                 if( ( axis != attrs[X] && axis != attrs[Y] ) && ( axis != X && axis != Y ) ){ // if we don't recognize the axis as X or Y in any format.. then we say it's X and Y (add both).
                     addScrollbar(X);
-                addScrollbar(Y);
+                    addScrollbar(Y);
+                    return self.scrollbars;
+                }
+                if( ( axis == attrs[X] || axis == X ) && !isScrollbarExists(X) ) return self.scrollbars[X] = new Scrollbar(X);
+                if( ( axis == attrs[Y] || axis == Y ) && !isScrollbarExists(Y) ) return self.scrollbars[Y] = new Scrollbar(Y);
                 return self.scrollbars;
             }
-            if( ( axis == attrs[X] || axis == X ) && !isScrollbarExists(X) ) return self.scrollbars[X] = new Scrollbar(X);
-            if( ( axis == attrs[Y] || axis == Y ) && !isScrollbarExists(Y) ) return self.scrollbars[Y] = new Scrollbar(Y);
-            return self.scrollbars;
-        }
 
-        function removeScrollbar( axis ){
-            if( ( axis == attrs[X] || axis == X ) && isScrollbarExists(X) ){
-                self.scrollbars[X].destroy();
-                self.scrollbars.splice( X , 1 );
-            }else if( ( axis == attrs[Y] || axis == Y ) && isScrollbarExists(Y) ){
-                self.scrollbars[Y].destroy();
-                self.scrollbars.splice( Y , 1 );
+            function removeScrollbar( axis ){
+                if( ( axis == attrs[X] || axis == X ) && isScrollbarExists(X) ){
+                    self.scrollbars[X].destroy();
+                    self.scrollbars.splice( X , 1 );
+                }else if( ( axis == attrs[Y] || axis == Y ) && isScrollbarExists(Y) ){
+                    self.scrollbars[Y].destroy();
+                    self.scrollbars.splice( Y , 1 );
+                }
             }
-        }
 
-        function updateScrollbars(){
-            addScrollbar( self.options.axis );
-            $.each( self.scrollbars , function( i , val ){
-                if( isDef( val ) && val.axis == Y && self.options.axis == attrs[X] ) removeScrollbar(Y);
-                if( isDef( val ) && val.axis == X && self.options.axis == attrs[Y] ) removeScrollbar(X);
-            });
-            $.each( self.scrollbars , function( i , val ){
-                if( isDef( val ) ) val.update();
-            });
-        }
+            function updateScrollbars(){
+                addScrollbar( self.options.axis );
+                $.each( self.scrollbars , function( i , val ){
+                    if( isDef( val ) && val.axis == Y && self.options.axis == attrs[X] ) removeScrollbar(Y);
+                    if( isDef( val ) && val.axis == X && self.options.axis == attrs[Y] ) removeScrollbar(X);
+                });
+                $.each( self.scrollbars , function( i , val ){
+                    if( isDef( val ) ) val.update();
+                });
+            }
 
-        function isDualAxis(){
-            if( self.options.axis == X || self.options.axis == attrs[X] || self.options.axis == Y || self.options.axis == attrs[Y] ) return false;
-            return true;
-        }
+            function isDualAxis(){
+                if( self.options.axis == X || self.options.axis == attrs[X] || self.options.axis == Y || self.options.axis == attrs[Y] ) return false;
+                return true;
+            }
 
-        function isBothAxisExists(){
-            if( isDualAxis() && isScrollbarExists(X) && isScrollbarExists(Y) ) return true;
-            return false;
-        }
+            function isBothAxisExists(){
+                if( isDualAxis() && isScrollbarExists(X) && isScrollbarExists(Y) ) return true;
+                return false;
+            }
 
-        function isBothAxisInside(){
-            if( isBothAxisExists() && getScrollbar(X).isInside() && getScrollbar(Y).isInside() ) return true;
-            return false;
-        }
+            function isBothAxisInside(){
+                if( isBothAxisExists() && getScrollbar(X).isInside() && getScrollbar(Y).isInside() ) return true;
+                return false;
+            }
 
-        function isBothAxisOutside(){
-            if( isBothAxisExists() && !getScrollbar(X).isInside() && !getScrollbar(Y).isInside() ) return true;
-            return false;
-        }
+            function isBothAxisOutside(){
+                if( isBothAxisExists() && !getScrollbar(X).isInside() && !getScrollbar(Y).isInside() ) return true;
+                return false;
+            }
 
-        function isBothAxisVisible(){
-            if( isBothAxisExists() && !getScrollbar(X).isDisplayNone() && !getScrollbar(Y).isDisplayNone() ) return true;
-            return false;
-        }
+            function isBothAxisVisible(){
+                if( isBothAxisExists() && !getScrollbar(X).isDisplayNone() && !getScrollbar(Y).isDisplayNone() ) return true;
+                return false;
+            }
+
+            function jumpX( distance ){
+                if( isScrollbarExists(X) ){
+                    getScrollbar(X).jumpToContentPosition( getScrollbar(X).position.contentPosition + distance );
+                }
+            }
+
+            function jumpY( distance ){
+                if( isScrollbarExists(Y) ){
+                    getScrollbar(Ys).jumpToContentPosition( getScrollbar(Y).position.contentPosition + distance );
+                }    
+            }
 
             // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
             // SCROLLBAR OBJECT
@@ -370,6 +388,11 @@
                     thumbClicked: false,
                     trackClicked: false,
                     started: false
+                }
+
+                this.arrows = {
+                    startInterval: undefined,
+                    endInterval: undefined
                 }
 
                 this.wheel = {
@@ -412,46 +435,66 @@
             Scrollbar.prototype.setScrollbarCss = function(){
                 removePositionCss( this.$scrollbar );
                 this.$scrollbar
-                .css( this.getTransverseDimensionName() , this.getScrollbarTransverseSize() )
-                .css( this.getTransverseSideName() , this.getScrollbarTransversePosition() )
-                .css( this.getLongitudinalDimensionName() , this.getScrollbarLongitudinalSize() )
-                .css( this.getLongitudinalSideName() , this.getScrollbarLongitudinalPosition() );
+                    .css( this.getTransverseDimensionName() , this.getScrollbarTransverseSize() )
+                    .css( this.getTransverseSideName() , this.getScrollbarTransversePosition() )
+                    .css( this.getLongitudinalDimensionName() , this.getScrollbarLongitudinalSize() )
+                    .css( this.getLongitudinalSideName() , this.getScrollbarLongitudinalPosition() );
             }
 
             Scrollbar.prototype.setStartCss = function(){
                 removePositionCss( this.$start );
                 this.$start
-                .css( this.getTransverseDimensionName() , this.getStartTransverseSize() )
-                .css( this.getTransverseSideName() , this.getStartTransversePosition() )
-                .css( this.getLongitudinalDimensionName() , this.getStartLongitudinalSize() )
-                .css( this.getLongitudinalSideName() , this.getStartLongitudinalPosition() );
+                    .css( this.getTransverseDimensionName() , this.getStartTransverseSize() )
+                    .css( this.getTransverseSideName() , this.getStartTransversePosition() )
+                    .css( this.getLongitudinalDimensionName() , this.getStartLongitudinalSize() )
+                    .css( this.getLongitudinalSideName() , this.getStartLongitudinalPosition() );
+
+                var base = pluginName + self.options.theme + "Start" , name;
+                var dis = base + "Disabled";
+                if( this.isVertical() ) name = base + capitalizeFirstChar( attrs[U] );
+                else name = base + capitalizeFirstChar( attrs[L] );
+
+                if( this.position.thumbPosition == 0 ) name += " " + dis;
+                else this.$start.removeClass( dis );
+
+                this.$start.addClass( name );
             }
 
             Scrollbar.prototype.setTrackCss = function(){
                 removePositionCss( this.$track );
                 this.$track
-                .css( this.getTransverseDimensionName() , this.getTrackTransverseSize() )
-                .css( this.getTransverseSideName() , this.getTrackTransversePosition() )
-                .css( this.getLongitudinalDimensionName() , this.getTrackLongitudinalSize() )
-                .css( this.getLongitudinalSideName() , this.getTrackLongitudinalPosition() );
+                    .css( this.getTransverseDimensionName() , this.getTrackTransverseSize() )
+                    .css( this.getTransverseSideName() , this.getTrackTransversePosition() )
+                    .css( this.getLongitudinalDimensionName() , this.getTrackLongitudinalSize() )
+                    .css( this.getLongitudinalSideName() , this.getTrackLongitudinalPosition() );
             }
 
             Scrollbar.prototype.setEndCss = function(){
                 removePositionCss( this.$end );
                 this.$end
-                .css( this.getTransverseDimensionName() , this.getEndTransverseSize() )
-                .css( this.getTransverseSideName() , this.getEndTransversePosition() )
-                .css( this.getLongitudinalDimensionName() , this.getEndLongitudinalSize() )
-                .css( this.getLongitudinalSideName(true) , this.getEndLongitudinalPosition() );
+                    .css( this.getTransverseDimensionName() , this.getEndTransverseSize() )
+                    .css( this.getTransverseSideName() , this.getEndTransversePosition() )
+                    .css( this.getLongitudinalDimensionName() , this.getEndLongitudinalSize() )
+                    .css( this.getLongitudinalSideName(true) , this.getEndLongitudinalPosition() );
+
+                var base = pluginName + self.options.theme + "End" , name;
+                var dis =  base + "Disabled";
+                if( this.isVertical() ) name = base + capitalizeFirstChar( attrs[D] );
+                else name = base + capitalizeFirstChar( attrs[R] );
+
+                if( this.position.thumbPosition == ( this.getTrackLongitudinalSize() - this.getThumbLongitudinalSize() ) ) name += " " + dis;
+                else this.$end.removeClass( dis );
+
+                this.$end.addClass( name );
             }
 
             Scrollbar.prototype.setThumbCss = function(){
                 removePositionCss( this.$thumb );
                 this.$thumb
-                .css( this.getTransverseDimensionName() , this.getThumbTransverseSize() )
-                .css( this.getTransverseSideName() , this.getThumbTransversePosition() )
-                .css( this.getLongitudinalDimensionName() , this.getThumbLongitudinalSize() )
-                .css( this.getLongitudinalSideName() , this.getThumbLongitudinalPosition() );
+                    .css( this.getTransverseDimensionName() , this.getThumbTransverseSize() )
+                    .css( this.getTransverseSideName() , this.getThumbTransversePosition() )
+                    .css( this.getLongitudinalDimensionName() , this.getThumbLongitudinalSize() )
+                    .css( this.getLongitudinalSideName() , this.getThumbLongitudinalPosition() );
             }
 
             Scrollbar.prototype.isDisplayNone = function(){
@@ -712,6 +755,9 @@
                 this.position.thumbPosition = Math.min( ( this.getTrackLongitudinalSize() - this.getThumbLongitudinalSize() ) , this.position.contentPosition / this.getTrackRatio() );
                 
                 this.updatePositionCss();
+                this.setStartCss();
+                this.setEndCss();
+ 
                 this.triggerMove( delta );           
             }
 
@@ -741,12 +787,57 @@
 
             Scrollbar.prototype.bindEvents = function(){
                 var me = this;
+
                 this.$thumb.on( "mousedown" , { "axis" : this.axis } , function( e ){
                     me.start( e , false );
                 });
+
                 this.$track.on( "mousedown" ,  { "axis" : this.axis } , function( e ){
                     me.start( e , true );
                 });
+
+                this.$start.on( "mousedown" , { "me" : this } , this.startBoxMouseDown );
+                this.$end.on( "mousedown" , { "me" : this } , this.endBoxMouseDown );
+            }
+
+            Scrollbar.prototype.startBoxMouseDown = function( e ){
+                var me = e.data.me;
+                if( !isDef( me.arrows.startInterval ) ){
+                    $("body").addClass( "cScrollbarNoSelect" );
+                    $(document).on( "mouseup" , { "me" : me } , me.startBoxMouseUp );
+                    me.jumpToContentPosition( me.position.contentPosition - self.options.wheelSpeed );
+                    me.arrows.startInterval = setInterval(function(){ me.jumpToContentPosition( me.position.contentPosition - self.options.wheelSpeed ); } , 400 );
+                }
+            }
+
+            Scrollbar.prototype.startBoxMouseUp = function( e ){
+                var me = e.data.me;
+                if( isDef( me.arrows.startInterval ) ){
+                    $(document).off( "mouseup" , me.startBoxMouseUp );
+                    clearTimeout( me.arrows.startInterval );
+                    me.arrows.startInterval = undefined;
+                    $("body").removeClass( "cScrollbarNoSelect" );
+                }
+            }
+
+            Scrollbar.prototype.endBoxMouseDown = function( e ){
+                var me = e.data.me;
+                if( !isDef( me.arrows.endInterval ) ){
+                    $("body").addClass( "cScrollbarNoSelect" );
+                    $(document).on( "mouseup" , { "me" : me } , me.endBoxMouseUp );
+                    me.jumpToContentPosition( me.position.contentPosition + self.options.wheelSpeed );
+                    me.arrows.endInterval = setInterval(function(){ me.jumpToContentPosition( me.position.contentPosition + self.options.wheelSpeed ); } , 400 );
+                }
+            }
+
+            Scrollbar.prototype.endBoxMouseUp = function( e ){
+                var me = e.data.me;
+                if( isDef( me.arrows.endInterval ) ){
+                    $(document).off( "mouseup" , me.endBoxMouseUp );
+                    clearTimeout( me.arrows.endInterval );
+                    me.arrows.endInterval = undefined;
+                    $("body").removeClass( "cScrollbarNoSelect" );
+                }
             }
 
             Scrollbar.prototype.start = function( e , trackClicked ){
@@ -776,8 +867,8 @@
 
                     $(document).on( "mousemove" , { "me" : this } , this.drag );
                     $(document).on( "mouseup"   , { "me" : this } , this.end );
-                    this.$thumb.on( "mouseup"   , { "me" : this } , this.end );
-                    this.$track.on( "mouseup"   , { "me" : this } , this.end );
+                    //this.$thumb.on( "mouseup"   , { "me" : this } , this.end );
+                    //this.$track.on( "mouseup"   , { "me" : this } , this.end );
 
                     e.data.me = this;
                     this.drag( e , true );
@@ -827,8 +918,8 @@
 
                 $(document).off( "mousemove" , me.drag );
                 $(document).off( "mouseup" , me.end );
-                me.$thumb.off( "mouseup" , me.end );
-                me.$track.off( "mouseup" , me.end );
+                //me.$thumb.off( "mouseup" , me.end );
+                //me.$track.off( "mouseup" , me.end );
 
                 me.scrollbarDragEvent.trackClicked = false;
                 me.scrollbarDragEvent.thumbClicked = false;
@@ -879,8 +970,21 @@
             }
 
             function bindEvents(){
+
                 self.refreshInterval = setInterval( self.update() , 10000 );
+
                 $container.on( "mousewheel" , wheelEvent );
+
+                if( 'ontouchstart' in window ){
+                    $container.on( "touchstart" , touchStartEvent );
+                }else if( window.navigator.pointerEnabled ){
+                    $container.on( "pointerdown" , touchStartEvent );
+                }else if( window.navigator.msPointerEnabled ){ //
+                    $container.on( "MSPointerDown" , touchStartEvent );
+                }else{
+                    // ?? click ??
+                }
+
             }
 
             function wheelEvent( e ){
@@ -907,6 +1011,75 @@
                         getScrollbar(Y).wheelEvent( e );
                     }
                 }
+            }
+
+            function touchStartEvent( e ){
+
+                if( ! self.options.touchEnabled ) return;
+
+                $("body").addClass( "cScrollbarNoSelect" );
+
+                self.mousePosition = {
+                    'x' : e.pageX || e.originalEvent.touches[0].pageX,
+                    "y" : e.pageY || e.originalEvent.touches[0].pageY
+                };
+
+                if( 'ontouchstart' in window ){
+                    $(document).on( "touchmove"   , touchMoveEvent );
+                    $(document).on( "touchcancel" , touchEndEvent );
+                    $(document).on( "touchend"    , touchEndEvent );
+                }else if( window.navigator.pointerEnabled ){
+                    $(document).on( msPointerEvent("pointermove")   , touchMoveEvent );
+                    $(document).on( msPointerEvent("pointerup")     , touchEndEvent );
+                    $(document).on( msPointerEvent("pointercancel") , touchEndEvent );
+                }else if( window.navigator.msPointerEnabled ){
+                    $(document).on( msPointerEvent("MSPointerMove")   , touchMoveEvent );
+                    $(document).on( msPointerEvent("MSPointerUp")     , touchEndEvent );
+                    $(document).on( msPointerEvent("MSPointerCancel") , touchEndEvent );
+                }else{
+                    // ?? click ??
+                }
+
+                e.preventDefault();
+
+            }
+
+            function touchMoveEvent( e ){
+                var deltaX = self.mousePosition.x - ( e.pageX || e.originalEvent.touches[0].pageX );
+                var deltaY = self.mousePosition.y - ( e.pageY || e.originalEvent.touches[0].pageY );
+
+                if( deltaX ) jumpX( deltaX );
+                if( deltaY ) jumpY( deltaY );
+
+                self.mousePosition = {
+                    'x' : ( e.pageX || e.originalEvent.touches[0].pageX ),
+                    "y" : ( e.pageY || e.originalEvent.touches[0].pageY )
+                };
+
+                e.preventDefault();
+            }
+
+            function touchEndEvent( e ){
+
+                if( 'ontouchstart' in window ){
+                    $(document).off( "touchmove"   , touchMoveEvent );
+                    $(document).off( "touchcancel" , touchEndEvent );
+                    $(document).off( "touchend"    , touchEndEvent );
+                }else if( window.navigator.pointerEnabled ){
+                    $(document).off( msPointerEvent("pointermove")   , touchMoveEvent );
+                    $(document).off( msPointerEvent("pointerup")     , touchEndEvent );
+                    $(document).off( msPointerEvent("pointercancel") , touchEndEvent );
+                }else if( window.navigator.msPointerEnabled ){
+                    $(document).off( msPointerEvent("MSPointerMove")   , touchMoveEvent );
+                    $(document).off( msPointerEvent("MSPointerUp")     , touchEndEvent );
+                    $(document).off( msPointerEvent("MSPointerCancel") , touchEndEvent );
+                }else{
+                    // ?? click ??
+                }
+
+                $("body").removeClass( "cScrollbarNoSelect" );
+
+                e.preventDefault();
             }
 
             // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
