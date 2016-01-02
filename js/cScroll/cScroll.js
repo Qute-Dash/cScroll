@@ -105,8 +105,8 @@
             self.scrollbars = []; // this array will hold the scroll bars ( X and/or Y )
 
             self.mousePosition = {
-                "x":0,
-                "y":0
+                x:0,
+                y:0
             };
 
             // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -360,7 +360,7 @@
 
             function jumpY( distance ){
                 if( isScrollbarExists(Y) ){
-                    getScrollbar(Ys).jumpToContentPosition( getScrollbar(Y).position.contentPosition + distance );
+                    getScrollbar(Y).jumpToContentPosition( getScrollbar(Y).position.contentPosition + distance );
                 }    
             }
 
@@ -1079,8 +1079,8 @@
                 $("body").addClass( "cScrollbarNoSelect" );
 
                 self.mousePosition = {
-                    'x' : e.pageX || e.originalEvent.touches[0].pageX,
-                    "y" : e.pageY || e.originalEvent.touches[0].pageY
+                    x : e.pageX || e.originalEvent.touches[0].pageX,
+                    y : e.pageY || e.originalEvent.touches[0].pageY
                 };
 
                 if( 'ontouchstart' in window ){
@@ -1111,8 +1111,8 @@
                 if( deltaY ) jumpY( deltaY );
 
                 self.mousePosition = {
-                    'x' : ( e.pageX || e.originalEvent.touches[0].pageX ),
-                    "y" : ( e.pageY || e.originalEvent.touches[0].pageY )
+                    x : ( e.pageX || e.originalEvent.touches[0].pageX ),
+                    y : ( e.pageY || e.originalEvent.touches[0].pageY )
                 };
 
                 e.preventDefault();
