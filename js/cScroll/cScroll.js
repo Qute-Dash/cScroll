@@ -84,7 +84,7 @@
             flatOutAxis:'',
             cornerPosition:"", //"top right",
             
-
+            jumpSpeed:20,
 
             zoomEnabled:true
             
@@ -741,7 +741,7 @@
                     return;
                 }
 
-                $container.trigger( "move" + capitalizeFirstChar( direction ) );
+                $container.trigger( pluginName + "Move" + capitalizeFirstChar( direction ) );
             }
 
             Scrollbar.prototype.updatePositionCss = function( thumbPosition , contentPosition ){
@@ -792,6 +792,9 @@
                 this.$scrollbar.on( "mouseenter" , { "me" : this } , this.scrollbarMouseEnter );
                 this.$scrollbar.on( "mouseleave" , { "me" : this } , this.scrollbarMouseLeave );
 
+                this.$thumb.on( "mouseenter" , { "me" : this } , this.thumbMouseEnter );
+                this.$thumb.on( "mouseleave" , { "me" : this } , this.thumbMouseLeave );
+
                 this.$thumb.on( "mousedown" , { "axis" : this.axis } , function( e ){
                     me.start( e , false );
                 });
@@ -816,13 +819,37 @@
                 me.$scrollbar.removeClass( pluginName + self.options.theme + "ScrollbarHovered" );
             }
 
+            Scrollbar.prototype.thumbMouseEnter = function( e ){
+                var me = e.data.me;
+                me.$thumb.addClass( pluginName + self.options.theme + "ThumbHovered" );
+            }
+
+            Scrollbar.prototype.thumbMouseLeave = function( e ){
+                var me = e.data.me;
+                me.$thumb.removeClass( pluginName + self.options.theme + "ThumbHovered" );
+            }
+
+            Scrollbar.prototype.jumpTowardStart = function(){
+                this.jumpToContentPosition( this.position.contentPosition - self.options.jumpSpeed );
+            }
+
+            Scrollbar.prototype.jumpTowardEnd = function(){
+                this.jumpToContentPosition( this.position.contentPosition + self.options.jumpSpeed );
+            }
+
             Scrollbar.prototype.startBoxMouseDown = function( e ){
                 var me = e.data.me;
                 if( !isDef( me.arrows.startInterval ) ){
                     $("body").addClass( "cScrollbarNoSelect" );
                     $(document).on( "mouseup" , { "me" : me } , me.startBoxMouseUp );
-                    me.jumpToContentPosition( me.position.contentPosition - self.options.wheelSpeed );
-                    me.arrows.startInterval = setInterval(function(){ me.jumpToContentPosition( me.position.contentPosition - self.options.wheelSpeed ); } , 400 );
+                    me.jumpTowardStart();
+                    var i = 0;
+                    me.arrows.startInterval = setInterval(function(){
+                        i++;
+                        me.jumpTowardStart();
+                        if( i > 4 ) me.jumpTowardStart();
+                        if( i > 8 ) me.jumpTowardStart();
+                    } , 400 );
                 }
             }
 
@@ -841,8 +868,14 @@
                 if( !isDef( me.arrows.endInterval ) ){
                     $("body").addClass( "cScrollbarNoSelect" );
                     $(document).on( "mouseup" , { "me" : me } , me.endBoxMouseUp );
-                    me.jumpToContentPosition( me.position.contentPosition + self.options.wheelSpeed );
-                    me.arrows.endInterval = setInterval(function(){ me.jumpToContentPosition( me.position.contentPosition + self.options.wheelSpeed ); } , 400 );
+                    me.jumpTowardEnd();
+                    var i = 0;
+                    me.arrows.endInterval = setInterval(function(){
+                        i++;
+                        me.jumpTowardEnd();
+                        if( i > 4 ) me.jumpTowardEnd();
+                        if( i > 8 ) me.jumpTowardEnd();
+                    } , 400 );
                 }
             }
 
