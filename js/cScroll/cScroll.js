@@ -375,7 +375,8 @@
                 this.status = {
                     inside: false, // is pointer device inside the $scrollbar container ?
                     animated: false, // is any scrollbar animation in progress ?
-                    hovered: false // is the scrollbar in hovered state ?
+                    hovered: false, // is the scrollbar in hovered state ?
+                    isThumbPressed: false
                 };
 
                 this.position = {
@@ -857,6 +858,11 @@
 
             Scrollbar.prototype.start = function( e , trackClicked ){
 
+                //if( !trackClicked ){
+                    this.status.isThumbPressed = true;
+                    this.$thumb.addClass( pluginName + self.options.theme + "ThumbActive" );
+                //}
+
                 if( this.hasContentToSroll() ){
 
                     if( this.scrollbarDragEvent.thumbClicked ) return; // a higher priority drag event has been already stated...
@@ -939,6 +945,11 @@
                 me.scrollbarDragEvent.trackClicked = false;
                 me.scrollbarDragEvent.thumbClicked = false;
                 me.scrollbarDragEvent.started = false;
+
+                if( me.status.isThumbPressed ){
+                    me.status.isThumbPressed = false;
+                    me.$thumb.removeClass( pluginName + self.options.theme + "ThumbActive" );
+                }
 
                 e.preventDefault();
             }

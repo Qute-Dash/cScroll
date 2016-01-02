@@ -118,6 +118,10 @@
 	background-color:rgba(250,30,200,0.8);
 }
 
+.cScrollThumbActive{
+	background-color:rgba(150,70,20,0.8) !important;
+}
+
 /*.cScrollThumb:hover{
 	background-color:rgba(250,30,200,0.8);
 }*/
